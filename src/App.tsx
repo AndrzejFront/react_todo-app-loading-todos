@@ -152,6 +152,7 @@ const ErrorNotification: React.FC<ErrorNotificationProps> = ({
 
 const TodoApp: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isLoadingTodos, setIsLoadingTodos] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState(FilterStatus.All);
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | null>(null);
   const errorTimeoutId = useRef<number | null>(null);
@@ -181,6 +182,7 @@ const TodoApp: React.FC = () => {
     let isMounted = true;
 
     hideError();
+    setIsLoadingTodos(true);
 
     getTodos()
       .then(loadedTodos => {
@@ -191,6 +193,11 @@ const TodoApp: React.FC = () => {
       .catch(() => {
         if (isMounted) {
           showError(ErrorMessage.LoadTodos);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingTodos(false);
         }
       });
 
@@ -264,6 +271,16 @@ const TodoApp: React.FC = () => {
             </button>
           </footer>
         )}
+      </div>
+
+      <div
+        data-cy="TodoLoader"
+        className={classNames('modal', {
+          'is-active': isLoadingTodos,
+        })}
+      >
+        <div className="modal-background has-background-white-ter" />
+        <div className="loader" />
       </div>
 
       <ErrorNotification errorMessage={errorMessage} onClose={hideError} />
